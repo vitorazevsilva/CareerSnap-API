@@ -16,7 +16,7 @@ const main_data = {
   },
   country: faker.address.country(),
   nationality: 'Portuguese',
-  phone: faker.phone.number().replace(' ', '')
+  phone: faker.phone.number('+351 96#######').replace(' ', '')
 }
 
 beforeAll(async () => {
@@ -37,7 +37,7 @@ test('[AUTH][1] - Register with correct data', () => {
     },
     country: faker.address.country(),
     nationality: 'Portuguese',
-    phone: faker.phone.number()
+    phone: faker.phone.number('+351 96#######')
   }
   console.log(data)
   return request(app).post('/auth/signup')
@@ -62,7 +62,7 @@ test('[AUTH][2] - Register without a field (birth_date)', () => {
     },
     country: faker.address.country(),
     nationality: 'Portuguese',
-    phone: faker.phone.number(),
+    phone: faker.phone.number('+351 96#######'),
   }
   return request(app).post('/auth/signup')
     .send(data)
@@ -87,7 +87,7 @@ test('[AUTH][3] - Register an invalid name', () => {
     },
     country: faker.address.country(),
     nationality: 'Portuguese',
-    phone: faker.phone.number(),
+    phone: faker.phone.number('+351 96#######'),
   }
   return request(app).post('/auth/signup')
     .send(data)
@@ -112,7 +112,7 @@ test('[AUTH][4] - Register an invalid email', () => {
     },
     country: faker.address.country(),
     nationality: 'Portuguese',
-    phone: faker.phone.number(),
+    phone: faker.phone.number('+351 96#######'),
   }
   return request(app).post('/auth/signup')
     .send(data)
@@ -137,7 +137,7 @@ test('[AUTH][5] - Register with an insecure password', () => {
     },
     country: faker.address.country(),
     nationality: 'Portuguese',
-    phone: faker.phone.number()
+    phone: faker.phone.number('+351 96#######')
   }
 
   return request(app).post('/auth/signup')
@@ -163,7 +163,7 @@ test('[AUTH][6] - Register with an invalid date', () => {
     },
     country: faker.address.country(),
     nationality: 'Portuguese',
-    phone: faker.phone.number()
+    phone: faker.phone.number('+351 96#######')
   }
 
   return request(app).post('/auth/signup')
@@ -203,7 +203,7 @@ test('[AUTH][7] - Register with an invalid phone number', () => {
 
 test('[AUTH][8] - Register with an existing email', async () => {
   const dataAdd = {... main_data}
-  dataAdd.phone = faker.phone.number();
+  dataAdd.phone = faker.phone.number('+351 96#######');
   return request(app).post('/auth/signup')
     .send(dataAdd)
     .then((res) => {
