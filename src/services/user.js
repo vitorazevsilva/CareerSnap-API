@@ -149,6 +149,16 @@ module.exports = (app) => {
     return ageInYears >= 15;
   }
 
+  const verifyProperties= (obj, expectedProperties) => {
+    const objProperties = Object.keys(obj);
+    for (let i = 0; i < objProperties.length; i++) {
+      if (!expectedProperties.includes(objProperties[i])) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   /*
    ########################################################
    #########           OTHER FUNCTIONS            #########
@@ -195,12 +205,4 @@ module.exports = (app) => {
     return result;
   }
 
-  const verifyProperties= (obj, expectedProperties) => {
-    const objProperties = Object.keys(obj);
-    for (let i = 0; i < objProperties.length; i++) {
-      if (!expectedProperties.includes(objProperties[i])) {
-        return false;
-      }
-    }
-    return true;
-  }
+ 

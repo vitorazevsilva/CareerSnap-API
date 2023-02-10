@@ -24,7 +24,6 @@ const _mainData = [
 
 beforeAll(async () => {
     let result = await app.services.user.save(_mainData[0]);
-    console.log(result[0]);
     _mainData[0].id = result[0].id
     _mainData[0].token = jwt.encode({id:_mainData[0].id}, secret);
 })
