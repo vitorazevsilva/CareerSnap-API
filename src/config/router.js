@@ -5,7 +5,7 @@ module.exports = (app) => {
 
   const secureRouter = express.Router();
 
-  //secureRouter.use('/users', app.routes.users);
+  secureRouter.use('/user', app.routes.users);
   
 
   app.use('/v1', app.config.passport.authenticate(), secureRouter);

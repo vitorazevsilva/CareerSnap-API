@@ -360,3 +360,29 @@ test('[AUTH][21] - Password change with a expired recovery key', async () => {
     });
 });
 
+test('[AUTH][22] - Try to put invalid parameters', async () => {
+  const data = {
+    email: faker.internet.email(),
+    password: faker.internet.password(20, false),
+    full_name: `${faker.name.firstName()} ${faker.name.middleName()} ${faker.name.lastName()}`,
+    birth_date: faker.date.birthdate({ min: 18, max: 65, mode: 'age' }),
+    address: {
+      street: faker.address.streetAddress(),
+      city: faker.address.city(),
+      state: faker.address.state(),
+      zipCode: faker.address.zipCode()
+    },
+    country: faker.address.country(),
+    nationality: 'Portuguese',
+    phone: faker.phone.number('+351 96#######'),
+    test:'test'
+  }
+
+  return request(app).post('/auth/signup')
+    .send(data)
+    .then((res) => {
+      expect(res.status).toBe(400);
+      expect(res.body.message).toBe('Invalid parameter received');
+    });
+});
+

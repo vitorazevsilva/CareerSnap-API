@@ -5,6 +5,9 @@ const validator = require('validator');
 
 module.exports = (app) => {
   let _mainUrl = `${app._frontEndUrl}/auth.html`
+  const expectedProperties = ['email', 'password', 'full_name', 'birth_date', 'address', 'country', 'nationality', 'phone'];
+
+
   const findOne = (filter = {}) => {
     return app.db('users').where(filter).first();
   };
@@ -30,7 +33,7 @@ module.exports = (app) => {
     if(!isStrongPwd(user.password)) return {message:'Password is not secure'}
     if(!checkDate(user.birth_date)) return {message:'Date of birth is not valid'}
     if(!validator.isMobilePhone(user.phone,'any', {strictMode: true})) return {message: 'Phone is not valid'};
-
+    if(!verifyProperties(user,expectedProperties)) return {message: 'Invalid parameter received'}
     const userDb_email = await findAll({ email: user.email });
     if (userDb_email && userDb_email.length > 0) return {message:'Email is already registered'}
 
@@ -77,8 +80,33 @@ module.exports = (app) => {
     return {}
   }
 
+  const update = async (id,user) => {
+    
+    if('id' in user) return {message2:'Id cannot be updated'}
+    if ('full_name' in user) 
+      if(!checkNameCount(user.full_name)) return {message:'Full name is not valid'}
+    if ('email' in user) {
+      if(!validator.isEmail(user.email)) return {message:'Email is not valid'}
+      const userDb_email = await findAll({ email: user.email });
+      if (userDb_email && userDb_email.length > 0) return {message:'Email is already registered'}
+    } 
+    if ('password' in user)
+      if(!isStrongPwd(user.password)) return {message:'Password is not secure'}
+    if ('birth_date' in user) 
+      if(!checkDate(user.birth_date)) return {message:'Date of birth is not valid'}
+    if ('phone' in user){
+      user.phone = user.phone.replace(' ', '')
+      if(!validator.isMobilePhone(user.phone,'any', {strictMode: true})) return {message: 'Phone is not valid'};
+    }
+    if(!verifyProperties(user,expectedProperties)) return {message: 'Invalid parameter received'}
 
-  return { findAll, save, findOne, genRecovery, proceedRecovery };
+    const lastUser = await findOne({id})
+    const data = mergeArrays(lastUser, user)
+    return await app.db('users').where({id}).update(data, ['id', 'email', 'full_name', 'birth_date','address', 'country', 'nationality','phone'])
+  }
+
+
+  return { findAll, save, findOne, genRecovery, proceedRecovery, update };
 };  
 
   /*                                                        
@@ -148,4 +176,31 @@ module.exports = (app) => {
     currentDate.setMinutes(currentDate.getMinutes() + time);
     return currentDate;
 
+  }
+
+  const mergeArrays = (lastData, nowData) => {
+    let result = {};
+    for (let key in lastData) {
+      if (nowData[key] !== undefined) {
+        result[key] = nowData[key];
+      } else {
+        result[key] = lastData[key];
+      }
+    }
+    for (let key in nowData) {
+      if (result[key] === undefined) {
+        result[key] = nowData[key];
+      }
+    }
+    return result;
+  }
+
+  const verifyProperties= (obj, expectedProperties) => {
+    const objProperties = Object.keys(obj);
+    for (let i = 0; i < objProperties.length; i++) {
+      if (!expectedProperties.includes(objProperties[i])) {
+        return false;
+      }
+    }
+    return true;
   }
