@@ -1,19 +1,16 @@
 const bcrypt = require('bcrypt-nodejs');
+const { assign } = require('nodemailer/lib/shared');
 const validator = require('validator');
-//let _mainUrl = 'http://127.0.0.1:5500/auth.html'
+
 
 module.exports = (app) => {
+  let _mainUrl = `${app._frontEndUrl}/auth.html`
   const findOne = (filter = {}) => {
     return app.db('users').where(filter).first();
   };
 
   const findAll = async (filter = {}) => {
     return app.db('users').where(filter).select(['id', 'email', 'full_name', 'birth_date','address', 'country', 'nationality','phone']);
-  };
-
-  const getPasswordHash = (password) => {
-    const salt = bcrypt.genSaltSync(10);
-    return bcrypt.hashSync(password, salt);
   };
 
   const save = async (user) => {
@@ -45,22 +42,51 @@ module.exports = (app) => {
     newUser.address = JSON.stringify(user.address);
 
 
-    const res = await app.db('users').insert(newUser, ['id', 'email', 'full_name', 'birth_date','address', 'country', 'nationality','phone']);
-    /* let data = {
-        name: newUser.username,
-        type: newUser.type,
-        verificationUrl: `${mainUrl}?verificationKey=${verificationKey}&email=${newUser.email}#verify`
-      }
-    app.services.mailer.sendEmailUsingTemplate(newUser.email, 'Welcome to AvaliEdu', 'registration', data) */
-    return res
-
+    return await app.db('users').insert(newUser, ['id', 'email', 'full_name', 'birth_date','address', 'country', 'nationality','phone']);
   }
+  const genRecovery = async (email, test = false) => {
+    let recovery_key = "";
+    await findOne({ email:email })
+      .then(async (user) => {
+        if (user) {
+          const data = await app.db('account_recovery').where({ email: user.email, used: false }).andWhere('expires_at', '>', new Date()).first();
+          if (data){
+            recovery_key = data.recovery_key
+          }else{
+            recovery_key = generateKey(50)
+            await app.db('account_recovery').insert({email: user.email, recovery_key:recovery_key, expires_at: addMinutes(15)})
+          }
+          if(!test) await app.services.mailer.sendEmailUsingTemplate(user.email, 'CareerSnap Password Recovery Request', 'recovery', {recoveryLink:`${_mainUrl}?email=${user.email}&recovery_key=${recovery_key}`, fullName: user.full_name})
+        }
+      })
+      return recovery_key
+  }
+
+  const proceedRecovery = async (res) => {
+    if (!res.email) return {message:'Email is a mandatory attribute'}
+    if (!res.recovery_key) return {message:'Recovery Key is a mandatory attribute'}
+    if (!res.password) return {message:'Password is a mandatory attribute'}
+    if(!isStrongPwd(res.password)) return {message:'Password is not secure'}
+
+    const recovery = await app.db('account_recovery').where({ email: res.email, recovery_key:res.recovery_key, used: false }).andWhere('expires_at', '>', new Date()).first()
+    
+    if (!recovery) return {message2:'Invalid Attributes, Recovery Key already used or expired'}
+    await app.db('account_recovery').where({recovery_key: res.recovery_key}).update({used: true})
+    await app.db('users').where({email: res.email}).update({password: getPasswordHash(res.password)})
+      
+    return {}
+  }
+
+
+  return { findAll, save, findOne, genRecovery, proceedRecovery };
+};  
+
   /*                                                        
    ########################################################
-   #########        Verification Functions        #########
+   #########        VERIFICATION FUNCTIONS        #########
    ########################################################
   */
-  const checkNameCount = (name) => {
+   const checkNameCount = (name) => {
     let words = name.split(' ');
     return words.length >= 3;
   }
@@ -95,6 +121,31 @@ module.exports = (app) => {
     return ageInYears >= 15;
   }
 
+  /*
+   ########################################################
+   #########           OTHER FUNCTIONS            #########
+   ########################################################
+  */
 
-  return { findAll, save, findOne };
-};
+  const getPasswordHash = (password) => {
+    const salt = bcrypt.genSaltSync(10);
+    return bcrypt.hashSync(password, salt);
+  };
+
+  const generateKey= (length) => {
+    let key = "";
+    let possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    
+    for (let i = 0; i < length; i++) {
+      key += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
+    
+    return key;
+  }
+
+  const addMinutes = (time=0) => {
+    let currentDate = new Date();
+    currentDate.setMinutes(currentDate.getMinutes() + time);
+    return currentDate;
+
+  }

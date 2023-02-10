@@ -7,7 +7,13 @@ const { uuid } = require('uuidv4');
 const knex = require('knex');
 const knexfile = require('../knexfile');
 
-// app.db = knex(knexfile.test);
+const nodemailer = require('nodemailer');
+const nodemailerfile = require('../nodemailer');
+
+app.mailer = nodemailer.createTransport(nodemailerfile[process.env.NODE_ENV]);
+
+app._frontEndUrl = 'http://127.0.0.1:5500';
+
 app.use(cors());
 
 app.db = knex(knexfile[process.env.NODE_ENV]);

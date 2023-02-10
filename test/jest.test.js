@@ -1,4 +1,4 @@
-test('Validar as operações de JEST', () => {
+test('[JEST][1] - Validate Jest', () => {
   let number = null;
   expect(number).toBeNull();
   number = 10;
@@ -9,7 +9,7 @@ test('Validar as operações de JEST', () => {
   expect(number).toBeLessThan(11);
 });
 
-test('Validar objetos', () => {
+test('[JEST][2] - Validate objects', () => {
   const obj = { name: 'Vitor Silva', mail: 'vsilva@ipca.pt' };
   expect(obj).toHaveProperty('name');
   expect(obj).toHaveProperty('name', 'Vitor Silva');
