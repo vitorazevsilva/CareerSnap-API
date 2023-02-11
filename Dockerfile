@@ -6,6 +6,6 @@ COPY . .
 
 RUN npm install
 
-EXPOSE 3000
+EXPOSE 3001
 
-CMD ["npm", "run", "start"]
+CMD ["sh", "-c", "node_modules/.bin/knex migrate:latest --env prod && npm run start"]
