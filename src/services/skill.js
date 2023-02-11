@@ -38,11 +38,11 @@ module.exports = (app) => {
 
         if(skill.start_year && checkDate(skill.start_year)) return {message:'Start year is not valid'}
         if(skill.completion_year && checkDate(skill.completion_year)) return {message:'Completion year is not valid'}
-        //#######################################
+        
         if((skill.start_year && skill.completion_year) && !(skill.start_year<skill.completion_year)) return {message: 'Start year greater than completion year'}
         else if(skill.completion_year && !(lastSkill.start_year<skill.completion_year)) return {message: 'Start year greater than completion year'}
         else if(skill.start_year && !(skill.start_year<lastSkill.completion_year)) return {message: 'Start year greater than completion year'}
-        //#######################################
+        
         if(!verifyProperties(skill,['designation', 'start_year', 'completion_year', 'institution', 'field_of_study'])) return {message: 'Invalid parameter received'}
 
         const data = mergeArrays(lastSkill, skill)

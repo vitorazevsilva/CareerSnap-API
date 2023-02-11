@@ -7,6 +7,7 @@ module.exports = (app) => {
 
   secureRouter.use('/user', app.routes.users);
   secureRouter.use('/skill', app.routes.skills)
+  secureRouter.use('/experience', app.routes.experiences)
 
   app.use('/v1', app.config.passport.authenticate(), secureRouter);
 };
