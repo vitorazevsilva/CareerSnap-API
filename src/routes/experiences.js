@@ -4,6 +4,15 @@ const bcrypt = require('bcrypt-nodejs');
 module.exports = (app) => {
     const router = express.Router();
 
+    router.get('/', async(req, res, next) => {
+        try {
+            const experience = await app.services.experience.findAll({ user_id: req.user.id })
+            res.status(200).json({ message: 'Experiences Read Successfully', content: experience });
+        } catch (err) {
+            return next(err);
+        }
+    });
+
     router.post('/search', async(req, res, next) => {
         try {
             const experience = await app.services.experience.findAll(req.body)

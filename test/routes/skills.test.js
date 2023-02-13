@@ -168,7 +168,7 @@ test('[SKILL][6] - Create with extra attributes', () => {
 
 
 test('[SKILL][7] - Reading all skills', () => {
-    return request(app).post('/v1/skill/search')
+    return request(app).get('/v1/skill')
         .send()
         .set('authorization', `bearer ${_mainData[0].token}`)
         .then((res) => {

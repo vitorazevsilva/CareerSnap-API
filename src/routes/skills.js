@@ -4,6 +4,15 @@ const bcrypt = require('bcrypt-nodejs');
 module.exports = (app) => {
     const router = express.Router();
 
+    router.get('/', async(req, res, next) => {
+        try {
+            const skill = await app.services.skill.findAll({ user_id: req.user.id })
+            res.status(200).json({ message: 'Skills Read Successfully', content: skill });
+        } catch (err) {
+            return next(err);
+        }
+    });
+
     router.post('/search', async(req, res, next) => {
         try {
             const skill = await app.services.skill.findAll(req.body)

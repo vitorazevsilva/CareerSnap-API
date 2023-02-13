@@ -161,7 +161,7 @@ test('[EXPERIENCE][6] - Create with extra attributes', () => {
 });
 
 test('[EXPERIENCE][7] - Reading all experiences', () => {
-    return request(app).post('/v1/experience/search')
+    return request(app).get('/v1/experience')
         .send()
         .set('authorization', `bearer ${_mainData[0].token}`)
         .then((res) => {
