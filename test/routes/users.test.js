@@ -5,25 +5,44 @@ const { faker } = require('@faker-js/faker/locale/pt_PT');
 
 const secret = 'careersnap';
 const _mainData = [{
-    email: faker.internet.email(),
-    password: faker.internet.password(20, false),
-    full_name: `${faker.name.firstName()} ${faker.name.middleName()} ${faker.name.lastName()}`,
-    birth_date: faker.date.birthdate({ min: 18, max: 65, mode: 'age' }),
-    address: {
-        street: faker.address.streetAddress(),
-        city: faker.address.city(),
-        state: faker.address.state(),
-        zipCode: faker.address.zipCode()
+        email: faker.internet.email(),
+        password: faker.internet.password(20, false),
+        full_name: `${faker.name.firstName()} ${faker.name.middleName()} ${faker.name.lastName()}`,
+        birth_date: faker.date.birthdate({ min: 18, max: 65, mode: 'age' }),
+        address: {
+            street: faker.address.streetAddress(),
+            city: faker.address.city(),
+            state: faker.address.state(),
+            zipCode: faker.address.zipCode()
+        },
+        country: faker.address.country(),
+        nationality: 'Portuguese',
+        phone: faker.phone.number('+351 96#######').replace(' ', '')
     },
-    country: faker.address.country(),
-    nationality: 'Portuguese',
-    phone: faker.phone.number('+351 96#######').replace(' ', '')
-}, ]
+    {
+        email: faker.internet.email(),
+        password: faker.internet.password(20, false),
+        full_name: `${faker.name.firstName()} ${faker.name.middleName()} ${faker.name.lastName()}`,
+        birth_date: faker.date.birthdate({ min: 18, max: 65, mode: 'age' }),
+        address: {
+            street: faker.address.streetAddress(),
+            city: faker.address.city(),
+            state: faker.address.state(),
+            zipCode: faker.address.zipCode()
+        },
+        country: faker.address.country(),
+        nationality: 'Portuguese',
+        phone: faker.phone.number('+351 96#######').replace(' ', '')
+    }
+]
 
 beforeAll(async() => {
     let result = await app.services.user.save(_mainData[0]);
     _mainData[0].id = result[0].id
     _mainData[0].token = jwt.encode({ id: _mainData[0].id }, secret);
+    const result3 = await app.services.user.save(_mainData[1]);
+    _mainData[1].id = result3[0].id
+    _mainData[1].token = jwt.encode({ id: _mainData[1].id }, secret);
 })
 
 test('[USER][1] - Reading all data', () => {
@@ -77,9 +96,9 @@ test('[USER][4] - Try to put an invalid full name', () => {
         });
 });
 
-test('[USER][5] - Try to enter an email already registered', () => {
+test('[USER][5] - Try to enter an email already registered', async() => {
     return request(app).put('/v1/user')
-        .send({ email: _mainData[0].email })
+        .send({ email: _mainData[1].email })
         .set('authorization', `bearer ${_mainData[0].token}`)
         .then((res) => {
             expect(res.status).toBe(400);
